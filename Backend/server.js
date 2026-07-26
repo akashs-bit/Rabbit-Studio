@@ -22,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 const allowedOrigins = [
   process.env.CLIENT_URL || "http://localhost:5173",
   "http://localhost:3000",
+  "https://rabbit-studio-drab.vercel.app", // Hardcoded fallback for production
 ];
 
 app.use(
