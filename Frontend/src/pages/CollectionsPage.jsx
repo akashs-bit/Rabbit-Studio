@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { FiFilter, FiX, FiGrid, FiList } from "react-icons/fi";
+import axios from "axios";
 import FilterSidebar from "../components/Products/FilterSidebar";
 import ProductGrid from "../components/Products/ProductGrid";
 
@@ -23,6 +24,19 @@ const CollectionsPage = () => {
     maxPrice: 15000,
     sortBy: "Featured",
   });
+
+  const getAuthHeaders = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token =
+      userInfo?.token ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken");
+
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
 
   // Automatically map the URL route parameter to corresponding filter states
   useEffect(() => {
@@ -74,8 +88,7 @@ const CollectionsPage = () => {
         queryParams.append("size", filters.sizes.join(","));
       if (filters.colors && filters.colors.length > 0)
         queryParams.append("color", filters.colors.join(","));
-      if (filters.maxPrice) 
-        queryParams.append("maxPrice", filters.maxPrice);
+      if (filters.maxPrice) queryParams.append("maxPrice", filters.maxPrice);
 
       if (filters.sortBy === "Newest") queryParams.append("sortBy", "newest");
       if (filters.sortBy === "Price: Low to High")
@@ -83,12 +96,14 @@ const CollectionsPage = () => {
       if (filters.sortBy === "Price: High to Low")
         queryParams.append("sortBy", "price-desc");
 
-      const response = await fetch(
+      const { data } = await axios.get(
         `http://localhost:5000/api/products?${queryParams.toString()}`,
+        {
+          headers: getAuthHeaders(),
+        },
       );
-      const data = await response.json();
 
-      if (response.ok) {
+      if (data) {
         const formattedProducts = (data.products || []).map((p) => {
           let resolvedImage = "";
           if (p.image) {
@@ -108,11 +123,9 @@ const CollectionsPage = () => {
 
         setProducts(formattedProducts);
         setTotalPages(data.totalPages || 1);
-      } else {
-        console.error("Failed to fetch products:", data.message);
       }
     } catch (error) {
-      console.error("Error connecting to backend:", error);
+      console.error("Error connecting to backend with Axios:", error);
     } finally {
       setLoading(false);
     }

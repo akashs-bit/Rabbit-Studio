@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, Save } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const CATEGORIES = ["Top Wear", "Bottom Wear", "Accessories", "Footwear"];
 const GENDERS = ["Men", "Women", "Unisex"];
@@ -34,41 +35,36 @@ const EditProduct = () => {
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
-        const response = await fetch(
+        // Fetch product details using Axios with destructuring
+        const { data } = await axios.get(
           `http://localhost:5000/api/products/${id}`,
         );
-        const data = await response.json();
 
-        if (response.ok) {
-          const imageUrls = Array.isArray(data.images)
-            ? data.images.map((img) => img.url).join(", ")
-            : "";
+        const imageUrls = Array.isArray(data.images)
+          ? data.images.map((img) => img.url).join(", ")
+          : "";
 
-          setFormData({
-            name: data.name || "",
-            description: data.description || "",
-            price: data.price !== undefined ? data.price.toString() : "",
-            category: data.category || "Top Wear",
-            gender: data.gender || "Men",
-            brand: data.brand || "Rabbit Elite",
-            stock:
-              data.countInStock !== undefined
-                ? data.countInStock.toString()
-                : "",
-            sku: data.sku || "",
-            collections: data.collections || "All Apparel",
-            images: imageUrls,
-            sizes: data.sizes || [],
-            colors: data.colors || [],
-            isPublished:
-              data.isPublished !== undefined ? data.isPublished : true,
-          });
-        } else {
-          toast.error(data.message || "Failed to fetch product details");
-        }
+        setFormData({
+          name: data.name || "",
+          description: data.description || "",
+          price: data.price !== undefined ? data.price.toString() : "",
+          category: data.category || "Top Wear",
+          gender: data.gender || "Men",
+          brand: data.brand || "Rabbit Elite",
+          stock:
+            data.countInStock !== undefined ? data.countInStock.toString() : "",
+          sku: data.sku || "",
+          collections: data.collections || "All Apparel",
+          images: imageUrls,
+          sizes: data.sizes || [],
+          colors: data.colors || [],
+          isPublished: data.isPublished !== undefined ? data.isPublished : true,
+        });
       } catch (err) {
         console.error("Error fetching product:", err);
-        toast.error("Error connecting to server");
+        const errorMessage =
+          err.response?.data?.message || "Error connecting to server";
+        toast.error(errorMessage);
       } finally {
         setFetching(false);
       }
@@ -102,7 +98,10 @@ const EditProduct = () => {
 
     try {
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-      const token = userInfo?.token || localStorage.getItem("token");
+      const token =
+        userInfo?.token ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("authToken");
 
       if (!token) {
         toast.error("Not authorized, please log in as admin again.");
@@ -126,26 +125,26 @@ const EditProduct = () => {
       };
       delete payload.stock;
 
-      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      // Update product using Axios PUT request with destructuring
+      const { data } = await axios.put(
+        `http://localhost:5000/api/products/${id}`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Product updated successfully!");
-        navigate("/admin/products");
-      } else {
-        toast.error(data.message || "Failed to update product");
-      }
+      console.log("Updated product response:", data);
+      toast.success("Product updated successfully!");
+      navigate("/admin/products");
     } catch (err) {
       console.error("Error updating product:", err);
-      toast.error("Error connecting to server");
+      const errorMessage =
+        err.response?.data?.message || "Error connecting to server";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

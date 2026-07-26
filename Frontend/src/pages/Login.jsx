@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import axios from "axios";
 import loginImg from "../assets/login.webp";
 
 const Login = () => {
@@ -9,6 +10,19 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+
+  const getAuthHeaders = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token =
+      userInfo?.token ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken");
+
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -25,19 +39,13 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const { data } = await axios.post(
+        "http://localhost:5000/api/users/login",
+        formData,
+        {
+          headers: getAuthHeaders(),
         },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid email or password.");
-      }
+      );
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -51,7 +59,11 @@ const Login = () => {
       }, 1200);
     } catch (err) {
       console.error("Login Error:", err);
-      toast.error(err.message || "Something went wrong. Please try again.");
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Something went wrong. Please try again.";
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }

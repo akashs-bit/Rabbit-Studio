@@ -10,6 +10,8 @@ import {
   Trash2,
   ArrowRight,
 } from "lucide-react";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const statusStyles = {
   Active: "bg-emerald-100 text-emerald-800 ring-emerald-200",
@@ -36,43 +38,42 @@ const ProductManagement = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
+      // Fetch products using Axios with destructuring
+      const { data } = await axios.get(
         "http://localhost:5000/api/products?limit=100",
       );
-      const data = await response.json();
 
-      if (response.ok) {
-        const formattedProducts = (data.products || []).map((p) => {
-          let resolvedImage = "";
-          if (p.image) {
-            resolvedImage = p.image;
-          } else if (Array.isArray(p.images) && p.images.length > 0) {
-            const firstImg = p.images[0];
-            resolvedImage =
-              typeof firstImg === "string" ? firstImg : firstImg?.url || "";
-          }
+      const formattedProducts = (data.products || []).map((p) => {
+        let resolvedImage = "";
+        if (p.image) {
+          resolvedImage = p.image;
+        } else if (Array.isArray(p.images) && p.images.length > 0) {
+          const firstImg = p.images[0];
+          resolvedImage =
+            typeof firstImg === "string" ? firstImg : firstImg?.url || "";
+        }
 
-          const stockVal = p.stock ?? p.countInStock ?? 10;
+        const stockVal = p.stock ?? p.countInStock ?? 10;
 
-          return {
-            ...p,
-            id: p._id,
-            stock: stockVal,
-            status: p.isPublished
-              ? stockVal <= 5
-                ? "Low Stock"
-                : "Active"
-              : "Draft",
-            sku: p.sku || `SKU-${p._id.slice(-6).toUpperCase()}`,
-            image: resolvedImage,
-          };
-        });
-        setProducts(formattedProducts);
-      } else {
-        console.error("Failed to fetch products");
-      }
+        return {
+          ...p,
+          id: p._id,
+          stock: stockVal,
+          status: p.isPublished
+            ? stockVal <= 5
+              ? "Low Stock"
+              : "Active"
+            : "Draft",
+          sku: p.sku || `SKU-${p._id.slice(-6).toUpperCase()}`,
+          image: resolvedImage,
+        };
+      });
+      setProducts(formattedProducts);
     } catch (error) {
       console.error("Error connecting to backend:", error);
+      const errorMessage =
+        error.response?.data?.message || "Error connecting to server";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -108,31 +109,29 @@ const ProductManagement = () => {
       return;
 
     try {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
       const token =
-        localStorage.getItem("token") || localStorage.getItem("authToken");
+        userInfo?.token ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("authToken");
 
-      const response = await fetch(
-        `http://localhost:5000/api/products/${productId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
+      // Delete product using Axios DELETE request
+      await axios.delete(`http://localhost:5000/api/products/${productId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-      );
+      });
 
-      if (response.ok) {
-        setProducts((current) =>
-          current.filter((product) => product.id !== productId),
-        );
-      } else {
-        const data = await response.json();
-        alert(data.message || "Failed to delete product");
-      }
+      toast.success("Product deleted successfully");
+      setProducts((current) =>
+        current.filter((product) => product.id !== productId),
+      );
     } catch (error) {
       console.error("Error deleting product:", error);
-      alert("Error connecting to server");
+      const errorMessage =
+        error.response?.data?.message || "Failed to delete product";
+      toast.error(errorMessage);
     }
   };
 

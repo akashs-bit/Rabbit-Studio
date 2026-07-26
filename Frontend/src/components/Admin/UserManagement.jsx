@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   KeyRound,
@@ -10,17 +10,10 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const ROLES = ["Customer", "Admin"];
-
-const INITIAL_USERS = [
-  {
-    id: "admin-user",
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "Admin",
-  },
-];
 
 const EMPTY_FORM = {
   name: "",
@@ -30,10 +23,6 @@ const EMPTY_FORM = {
 };
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const createUserId = () =>
-  globalThis.crypto?.randomUUID?.() ??
-  `user-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 const validateUserForm = (formData, users) => {
   const errors = {};
@@ -61,11 +50,48 @@ const validateUserForm = (formData, users) => {
 };
 
 const UserManagement = () => {
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const getAuthHeaders = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token =
+      userInfo?.token ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken");
+
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:5000/api/users", {
+        headers: getAuthHeaders(),
+      });
+
+      const formattedUsers = (data.users || data || []).map((u) => ({
+        ...u,
+        id: u._id || u.id,
+      }));
+
+      setUsers(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to load users";
+      toast.error(errorMessage);
+    }
+  };
 
   const adminCount = useMemo(
     () => users.filter((user) => user.role === "Admin").length,
@@ -79,6 +105,7 @@ const UserManagement = () => {
 
     return users.filter((user) =>
       [user.name, user.email, user.role]
+        .filter(Boolean)
         .join(" ")
         .toLowerCase()
         .includes(query),
@@ -104,7 +131,7 @@ const UserManagement = () => {
     setNotice("");
   };
 
-  const handleAddUser = (event) => {
+  const handleAddUser = async (event) => {
     event.preventDefault();
 
     const validationErrors = validateUserForm(formData, users);
@@ -112,53 +139,102 @@ const UserManagement = () => {
 
     if (Object.keys(validationErrors).length > 0) return;
 
-    const newUser = {
-      id: createUserId(),
-      name: formData.name.trim(),
-      email: formData.email.trim().toLowerCase(),
-      role: formData.role,
-    };
+    try {
+      const { data } = await axios.post(
+        "http://localhost:5000/api/users",
+        {
+          name: formData.name.trim(),
+          email: formData.email.trim().toLowerCase(),
+          password: formData.password,
+          role: formData.role,
+        },
+        {
+          headers: getAuthHeaders(),
+        },
+      );
 
-    setUsers((current) => [...current, newUser]);
-    setFormData(EMPTY_FORM);
-    setNotice("");
+      const createdUser = data.user || data;
+      const formattedNewUser = {
+        ...createdUser,
+        id: createdUser._id || createdUser.id,
+      };
+
+      setUsers((current) => [...current, formattedNewUser]);
+      setFormData(EMPTY_FORM);
+      setNotice("");
+      toast.success("User created successfully");
+    } catch (error) {
+      console.error("Error creating user:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to create user";
+      toast.error(errorMessage);
+    }
   };
 
-  const handleRoleChange = (userId, nextRole) => {
+  const handleRoleChange = async (userId, nextRole) => {
     if (!ROLES.includes(nextRole)) return;
 
-    setUsers((current) => {
-      const selectedUser = current.find((user) => user.id === userId);
+    const selectedUser = users.find((user) => user.id === userId);
 
-      if (
-        selectedUser?.role === "Admin" &&
-        nextRole !== "Admin" &&
-        adminCount === 1
-      ) {
-        setNotice("At least one admin account must remain active.");
-        return current;
-      }
+    if (
+      selectedUser?.role === "Admin" &&
+      nextRole !== "Admin" &&
+      adminCount === 1
+    ) {
+      setNotice("At least one admin account must remain active.");
+      toast.error("At least one admin account must remain active.");
+      return;
+    }
+
+    try {
+      const { data } = await axios.put(
+        `http://localhost:5000/api/users/${userId}`,
+        { role: nextRole },
+        {
+          headers: getAuthHeaders(),
+        },
+      );
 
       setNotice("");
-
-      return current.map((user) =>
-        user.id === userId ? { ...user, role: nextRole } : user,
+      setUsers((current) =>
+        current.map((user) =>
+          user.id === userId ? { ...user, role: nextRole } : user,
+        ),
       );
-    });
+      toast.success("User role updated successfully");
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to update user role";
+      toast.error(errorMessage);
+    }
   };
 
-  const handleDeleteUser = (userId) => {
-    setUsers((current) => {
-      const selectedUser = current.find((user) => user.id === userId);
+  const handleDeleteUser = async (userId) => {
+    const selectedUser = users.find((user) => user.id === userId);
 
-      if (selectedUser?.role === "Admin" && adminCount === 1) {
-        setNotice("At least one admin account must remain active.");
-        return current;
-      }
+    if (selectedUser?.role === "Admin" && adminCount === 1) {
+      setNotice("At least one admin account must remain active.");
+      toast.error("At least one admin account must remain active.");
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+    try {
+      await axios.delete(`http://localhost:5000/api/users/${userId}`, {
+        headers: getAuthHeaders(),
+      });
 
       setNotice("");
-      return current.filter((user) => user.id !== userId);
-    });
+      setUsers((current) => current.filter((user) => user.id !== userId));
+      toast.success("User deleted successfully");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to delete user";
+      toast.error(errorMessage);
+    }
   };
 
   return (
@@ -529,7 +605,7 @@ const UserAvatar = ({ name, role }) => (
         : "bg-gradient-to-br from-sky-500 to-cyan-700"
     }`}
   >
-    {name.trim().charAt(0) || "U"}
+    {(name || "U").trim().charAt(0)}
   </div>
 );
 

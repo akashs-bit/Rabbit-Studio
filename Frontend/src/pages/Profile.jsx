@@ -14,6 +14,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import axios from "axios";
 import MyOrdersPage from "./MyOrdersPage";
 
 // Toast Notification Component
@@ -403,6 +404,19 @@ const ChangePasswordModal = ({ onClose, showToast }) => {
 
   const [loading, setLoading] = useState(false);
 
+  const getAuthHeaders = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token =
+      userInfo?.token ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken");
+
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -419,37 +433,26 @@ const ChangePasswordModal = ({ onClose, showToast }) => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-
-      // Replace '/api/users/change-password' with your actual backend route
-      const response = await fetch(
+      const response = await axios.put(
         "http://localhost:5000/api/users/change-password",
         {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            oldPassword: formData.currentPassword,
-            newPassword: formData.newPassword,
-          }),
+          oldPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
         },
+        {
+          headers: getAuthHeaders(),
+        }
       );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        showToast("Password updated successfully!");
-        onClose();
-      } else {
-        showToast(data.message || "Failed to update password", "error");
-      }
-    } catch (err) {
-      console.error("Change Password Error:", err);
-      // Mock Success if backend route is not ready yet
       showToast("Password updated successfully!");
       onClose();
+    } catch (err) {
+      console.error("Change Password Error:", err);
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to update password";
+      showToast(errorMsg, "error");
     } finally {
       setLoading(false);
     }

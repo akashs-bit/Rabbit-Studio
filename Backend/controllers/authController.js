@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import User from "../models/User.js";
-import { generateToken } from "../utils/generateToken.js";
+import generateToken from "../utils/generateToken.js";
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -267,6 +267,24 @@ export const resetPassword = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Password reset successful! You can now log in.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Admin
+
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find().select("-password");
+
+    res.status(200).json({
+      success: true,
+      users,
     });
   } catch (error) {
     next(error);

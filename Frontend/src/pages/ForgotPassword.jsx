@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { KeyRound, ArrowLeft, Mail, Lock } from "lucide-react";
+import axios from "axios";
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1); // Step 1: Email, Step 2: OTP & New Password
@@ -12,38 +13,42 @@ const ForgotPassword = () => {
 
   const navigate = useNavigate();
 
-  // Send Reset Code
+  const getAuthHeaders = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token =
+      userInfo?.token ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken");
+
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
+  // Send Reset Code using Axios
   const handleRequestOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ text: "", type: "" });
 
     try {
-      const res = await fetch(
+      const { data } = await axios.post(
         "http://localhost:5000/api/users/forgot-password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        },
+        { email },
+        { headers: getAuthHeaders() },
       );
-      const data = await res.json();
 
-      if (res.ok) {
-        setMessage({
-          text: data.message || "Reset code sent to your email!",
-          type: "success",
-        });
-        setStep(2);
-      } else {
-        setMessage({
-          text: data.message || "Failed to send reset code.",
-          type: "error",
-        });
-      }
-    } catch (err) {
       setMessage({
-        text: "Network error. Please try again later.",
+        text: data?.message || "Reset code sent to your email!",
+        type: "success",
+      });
+      setStep(2);
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || "Failed to send reset code.";
+      setMessage({
+        text: errorMsg,
         type: "error",
       });
     } finally {
@@ -51,40 +56,31 @@ const ForgotPassword = () => {
     }
   };
 
-  // Reset Password
+  // Reset Password using Axios
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ text: "", type: "" });
 
     try {
-      const res = await fetch(
+      await axios.post(
         "http://localhost:5000/api/users/reset-password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp, newPassword }),
-        },
+        { email, otp, newPassword },
+        { headers: getAuthHeaders() },
       );
-      const data = await res.json();
 
-      if (res.ok) {
-        setMessage({
-          text: "Password reset successfully! Redirecting to login...",
-          type: "success",
-        });
-        setTimeout(() => {
-          navigate("/login");
-        }, 1500);
-      } else {
-        setMessage({
-          text: data.message || "Invalid or expired code.",
-          type: "error",
-        });
-      }
-    } catch (err) {
       setMessage({
-        text: "Network error. Please try again later.",
+        text: "Password reset successfully! Redirecting to login...",
+        type: "success",
+      });
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || "Invalid or expired code.";
+      setMessage({
+        text: errorMsg,
         type: "error",
       });
     } finally {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import toast from "react-hot-toast"; // 👈 1. Import toast
+import toast from "react-hot-toast";
 import {
   Mail,
   Lock,
@@ -10,6 +10,7 @@ import {
   Loader2,
   ArrowRight,
 } from "lucide-react";
+import axios from "axios";
 import registerImg from "../assets/register.webp";
 
 const Register = () => {
@@ -22,6 +23,19 @@ const Register = () => {
     password: "",
   });
 
+  const getAuthHeaders = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token =
+      userInfo?.token ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken");
+
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -29,34 +43,25 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.password) {
-      toast.error("Please complete all fields to join."); // 👈 Validation Toast
+      toast.error("Please complete all fields to join.");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/users/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const { data } = await axios.post(
+        "http://localhost:5000/api/users/register",
+        formData,
+        {
+          headers: getAuthHeaders(),
         },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Registration failed. Please try again.",
-        );
-      }
+      );
 
       // Save token and user info
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // 🎉 2. Success Toast
       toast.success(`Welcome to the club, ${data.user.name}! 🎉`, {
         duration: 3000,
       });
@@ -67,8 +72,11 @@ const Register = () => {
       }, 1500);
     } catch (err) {
       console.error("Registration Error:", err);
-      // ❌ 3. Error Toast
-      toast.error(err.message || "Server connection failed.");
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Server connection failed.";
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }

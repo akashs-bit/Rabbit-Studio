@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
+import axios from "axios";
 import toast from "react-hot-toast";
 
 const CATEGORIES = ["Top Wear", "Bottom Wear", "Accessories", "Footwear"];
@@ -83,26 +84,28 @@ const AddProductPage = () => {
       };
       delete payload.stock;
 
-      const response = await fetch("http://localhost:5000/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      // Make the POST request using Axios with direct data destructuring
+      const { data } = await axios.post(
+        "http://localhost:5000/api/products",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Product created successfully!");
-        navigate("/admin/products");
-      } else {
-        toast.error(data.message || "Failed to create product");
-      }
+      console.log("Created product response:", data);
+      toast.success("Product created successfully!");
+      navigate("/admin/products");
     } catch (err) {
       console.error("Error creating product:", err);
-      toast.error("Error connecting to server");
+
+      // Safely extract error message from Axios response if available
+      const errorMessage =
+        err.response?.data?.message || "Error connecting to server";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

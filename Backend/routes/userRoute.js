@@ -3,7 +3,8 @@ import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 
 import User from "../models/User.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { admin, protect } from "../middleware/authMiddleware.js";
+import { getAllUsers } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -273,5 +274,7 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({ message: "Server Error resetting password" });
   }
 });
+
+router.get("/", protect, admin, getAllUsers);
 
 export default router;

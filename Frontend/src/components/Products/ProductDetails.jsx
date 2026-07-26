@@ -12,6 +12,7 @@ import {
   FiTag,
   FiPercent,
 } from "react-icons/fi";
+import axios from "axios";
 import { useShop } from "../Cart/ShopContext";
 
 // Local dummy data fallback for collection items
@@ -155,6 +156,19 @@ const ProductDetails = () => {
   const [appliedDiscount, setAppliedDiscount] = useState(0); // Percentage or fixed
   const [appliedCouponName, setAppliedCouponName] = useState("");
 
+  const getAuthHeaders = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const token =
+      userInfo?.token ||
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken");
+
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
   useEffect(() => {
     const loadProductData = async () => {
       setLoading(true);
@@ -177,13 +191,16 @@ const ProductDetails = () => {
         return;
       }
 
-      // Fetch from backend API if available
+      // Fetch from backend API using Axios
       try {
-        const response = await fetch(
+        const { data } = await axios.get(
           `http://localhost:5000/api/products/${id}`,
+          {
+            headers: getAuthHeaders(),
+          }
         );
-        if (response.ok) {
-          const data = await response.json();
+
+        if (data) {
           setProduct(data);
           setSelectedImage(data.images?.[0]?.url || data.image);
           setSelectedColor(data.colors?.[0]?.name || "Standard");
