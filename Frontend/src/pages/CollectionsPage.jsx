@@ -97,7 +97,7 @@ const CollectionsPage = () => {
         queryParams.append("sortBy", "price-desc");
 
       const { data } = await axios.get(
-        `https://rabbit-studio-drab.vercel.app/api/products?${queryParams.toString()}`,
+        `https://rabbit-studio.onrender.com/api/products?${queryParams.toString()}`,
         {
           headers: getAuthHeaders(),
         },

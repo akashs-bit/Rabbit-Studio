@@ -43,7 +43,7 @@ const OrderDetailsPage = () => {
     try {
       const token = localStorage.getItem("token");
       const { data } = await axios.get(
-        `https://rabbit-studio-drab.vercel.app/api/orders/${id}`,
+        `https://rabbit-studio.onrender.com/api/orders/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

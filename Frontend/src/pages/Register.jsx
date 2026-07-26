@@ -51,7 +51,7 @@ const Register = () => {
 
     try {
       const { data } = await axios.post(
-        "https://rabbit-studio-drab.vercel.app/api/users/register",
+        "https://rabbit-studio.onrender.com/api/users/register",
         formData,
         {
           headers: getAuthHeaders(),

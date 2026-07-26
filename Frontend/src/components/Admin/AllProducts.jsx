@@ -32,7 +32,7 @@ const AllProducts = () => {
       
       // Make GET request using Axios with destructuring
       const { data } = await axios.get(
-        "https://rabbit-studio-drab.vercel.app/api/products?limit=500"
+        "https://rabbit-studio.onrender.com/api/products?limit=500"
       );
 
       const formattedProducts = (data.products || []).map((p) => {
@@ -92,7 +92,7 @@ const AllProducts = () => {
 
       // Make DELETE request using Axios with destructuring
       const { data } = await axios.delete(
-        `https://rabbit-studio-drab.vercel.app/api/products/${productId}`,
+        `https://rabbit-studio.onrender.com/api/products/${productId}`,
         {
           headers: {
             "Content-Type": "application/json",

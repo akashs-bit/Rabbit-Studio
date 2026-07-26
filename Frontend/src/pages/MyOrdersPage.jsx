@@ -227,7 +227,7 @@ const MyOrdersPage = () => {
       }
 
       const { data } = await axios.get(
-        `https://rabbit-studio-drab.vercel.app/api/orders/user/${user._id}`,
+        `https://rabbit-studio.onrender.com/api/orders/user/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

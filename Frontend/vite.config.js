@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://rabbit-studio-drab.vercel.app',
+        target: 'https://rabbit-studio.onrender.com',
         changeOrigin: true,
         secure: false,
       },

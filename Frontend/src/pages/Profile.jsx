@@ -434,7 +434,7 @@ const ChangePasswordModal = ({ onClose, showToast }) => {
 
     try {
       const response = await axios.put(
-        "https://rabbit-studio-drab.vercel.app/api/users/change-password",
+        "https://rabbit-studio.onrender.com/api/users/change-password",
         {
           oldPassword: formData.currentPassword,
           newPassword: formData.newPassword,

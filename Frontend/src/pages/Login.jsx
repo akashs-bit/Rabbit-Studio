@@ -40,7 +40,7 @@ const Login = () => {
 
     try {
       const { data } = await axios.post(
-        "https://rabbit-studio-drab.vercel.app/api/users/login",
+        "https://rabbit-studio.onrender.com/api/users/login",
         formData,
         {
           headers: getAuthHeaders(),

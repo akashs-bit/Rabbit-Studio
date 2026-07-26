@@ -86,7 +86,7 @@ const AddProductPage = () => {
 
       // Make the POST request using Axios with direct data destructuring
       const { data } = await axios.post(
-        "https://rabbit-studio-drab.vercel.app/api/products",
+        "https://rabbit-studio.onrender.com/api/products",
         payload,
         {
           headers: {
