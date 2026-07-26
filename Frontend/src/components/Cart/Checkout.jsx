@@ -153,7 +153,7 @@ const Checkout = () => {
       };
 
       const { data } = await axios.post(
-        "http://localhost:5000/api/orders",
+        "https://rabbit-studio-drab.vercel.app/api/orders",
         orderData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

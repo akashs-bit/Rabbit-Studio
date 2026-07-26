@@ -40,7 +40,7 @@ const ProductManagement = () => {
       setLoading(true);
       // Fetch products using Axios with destructuring
       const { data } = await axios.get(
-        "http://localhost:5000/api/products?limit=100",
+        "https://rabbit-studio-drab.vercel.app/api/products?limit=100",
       );
 
       const formattedProducts = (data.products || []).map((p) => {
@@ -116,7 +116,7 @@ const ProductManagement = () => {
         localStorage.getItem("authToken");
 
       // Delete product using Axios DELETE request
-      await axios.delete(`http://localhost:5000/api/products/${productId}`, {
+      await axios.delete(`https://rabbit-studio-drab.vercel.app/api/products/${productId}`, {
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

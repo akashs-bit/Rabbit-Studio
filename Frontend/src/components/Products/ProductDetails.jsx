@@ -194,7 +194,7 @@ const ProductDetails = () => {
       // Fetch from backend API using Axios
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/products/${id}`,
+          `https://rabbit-studio-drab.vercel.app/api/products/${id}`,
           {
             headers: getAuthHeaders(),
           }

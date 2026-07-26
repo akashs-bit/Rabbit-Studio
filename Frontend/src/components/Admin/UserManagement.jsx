@@ -75,7 +75,7 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/users", {
+      const { data } = await axios.get("https://rabbit-studio-drab.vercel.app/api/users", {
         headers: getAuthHeaders(),
       });
 
@@ -141,7 +141,7 @@ const UserManagement = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/users",
+        "https://rabbit-studio-drab.vercel.app/api/users",
         {
           name: formData.name.trim(),
           email: formData.email.trim().toLowerCase(),
@@ -188,7 +188,7 @@ const UserManagement = () => {
 
     try {
       const { data } = await axios.put(
-        `http://localhost:5000/api/users/${userId}`,
+        `https://rabbit-studio-drab.vercel.app/api/users/${userId}`,
         { role: nextRole },
         {
           headers: getAuthHeaders(),
@@ -222,7 +222,7 @@ const UserManagement = () => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/users/${userId}`, {
+      await axios.delete(`https://rabbit-studio-drab.vercel.app/api/users/${userId}`, {
         headers: getAuthHeaders(),
       });
 

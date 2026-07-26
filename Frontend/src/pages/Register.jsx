@@ -51,7 +51,7 @@ const Register = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/users/register",
+        "https://rabbit-studio-drab.vercel.app/api/users/register",
         formData,
         {
           headers: getAuthHeaders(),

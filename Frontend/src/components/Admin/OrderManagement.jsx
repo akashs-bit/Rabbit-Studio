@@ -83,7 +83,7 @@ const OrderManagement = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const { data } = await axios.get("http://localhost:5000/api/orders", {
+      const { data } = await axios.get("https://rabbit-studio-drab.vercel.app/api/orders", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -127,7 +127,7 @@ const OrderManagement = () => {
       const token = localStorage.getItem("token");
 
       await axios.patch(
-        `http://localhost:5000/api/orders/${dbId}/status`,
+        `https://rabbit-studio-drab.vercel.app/api/orders/${dbId}/status`,
         { status },
         {
           headers: {
@@ -148,7 +148,7 @@ const OrderManagement = () => {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(`http://localhost:5000/api/orders/${dbId}`, {
+      await axios.delete(`https://rabbit-studio-drab.vercel.app/api/orders/${dbId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

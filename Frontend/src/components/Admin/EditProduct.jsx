@@ -37,7 +37,7 @@ const EditProduct = () => {
       try {
         // Fetch product details using Axios with destructuring
         const { data } = await axios.get(
-          `http://localhost:5000/api/products/${id}`,
+          `https://rabbit-studio-drab.vercel.app/api/products/${id}`,
         );
 
         const imageUrls = Array.isArray(data.images)
@@ -127,7 +127,7 @@ const EditProduct = () => {
 
       // Update product using Axios PUT request with destructuring
       const { data } = await axios.put(
-        `http://localhost:5000/api/products/${id}`,
+        `https://rabbit-studio-drab.vercel.app/api/products/${id}`,
         payload,
         {
           headers: {

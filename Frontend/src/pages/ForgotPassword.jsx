@@ -34,7 +34,7 @@ const ForgotPassword = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:5000/api/users/forgot-password",
+        "https://rabbit-studio-drab.vercel.app/api/users/forgot-password",
         { email },
         { headers: getAuthHeaders() },
       );
@@ -64,7 +64,7 @@ const ForgotPassword = () => {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/users/reset-password",
+        "https://rabbit-studio-drab.vercel.app/api/users/reset-password",
         { email, otp, newPassword },
         { headers: getAuthHeaders() },
       );

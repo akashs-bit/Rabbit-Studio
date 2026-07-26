@@ -40,7 +40,7 @@ const SearchBar = () => {
     const delayDebounceFn = setTimeout(async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:5000/api/products?search=${encodeURIComponent(
+          `https://rabbit-studio-drab.vercel.app/api/products?search=${encodeURIComponent(
             searchTerm.trim(),
           )}`,
         );
