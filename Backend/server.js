@@ -4,8 +4,8 @@ import dotenv from "dotenv";
 import dns from "dns";
 
 import connectDB from "./config/db.js";
-import userRoutes from "./routes/userRoute.js";
-import productRoutes from "./routes/ProductRoute.js";
+import userRoute from "./routes/userRoute.js";
+import productRoute from "./routes/productRoute.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
 dotenv.config();
