@@ -21,7 +21,11 @@ export const createOrder = async (req, res) => {
       });
     }
 
+    // Generate a unique order ID using timestamp and a random number
+    const uniqueOrderId = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+
     const order = await Order.create({
+      orderId: uniqueOrderId, // Explicitly pass a truly unique ID
       user,
       items,
       shippingAddress,
