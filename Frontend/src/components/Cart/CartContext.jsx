@@ -83,32 +83,34 @@ const CartContext = ({ onClose }) => {
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col bg-white">
-      <div className="shrink-0 border-b border-gray-100 px-5 py-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-[#ea2e0e]">
-              Shopping Bag
-            </p>
-            <h2 className="mt-1 text-2xl font-bold text-gray-950">Your Cart</h2>
-          </div>
-
-          <span className="rounded-full bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700">
-            {cartProducts.length} item{cartProducts.length === 1 ? "" : "s"}
-          </span>
+    <div className="flex h-full w-full flex-col bg-white overflow-hidden">
+      {/* Cart Header */}
+      <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-5 py-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-[#ea2e0e]">
+            Shopping Bag
+          </p>
+          <h2 className="mt-0.5 text-xl font-bold text-gray-950 sm:text-2xl">
+            Your Cart
+          </h2>
         </div>
+
+        <span className="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-bold text-gray-700 sm:text-sm">
+          {cartProducts.length} item{cartProducts.length === 1 ? "" : "s"}
+        </span>
       </div>
 
+      {/* Free Shipping Tracker */}
       <ShippingProgress
         subtotal={subtotal}
         progress={shippingProgress}
         amountRemaining={amountForFreeShipping}
       />
 
-      <div className="min-h-0 flex-1 overflow-y-auto bg-gray-50/70 px-4 py-4">
+      {/* Scrollable Products Area */}
+      <div className="flex-1 overflow-y-auto bg-gray-50/70 px-4 py-3">
         <div className="space-y-3">
           {cartProducts.map((product) => {
-            // ✅ Unique key based on ID, size, and color so separate variants don't overwrite each other
             const uniqueKey = `${product.productID || product._id}-${product.size}-${product.color}`;
 
             return (
@@ -138,18 +140,19 @@ const CartContext = ({ onClose }) => {
         </div>
       </div>
 
+      {/* Cart Footer */}
       <CartFooter
         subtotal={subtotal}
         shippingFee={shippingFee}
         total={total}
         onCheckout={handleCheckout}
       />
-    </section>
+    </div>
   );
 };
 
 const EmptyCart = ({ onExplore }) => (
-  <div className="grid h-full place-items-center bg-white p-6 text-center">
+  <div className="grid h-full w-full place-items-center bg-white p-6 text-center">
     <div>
       <div className="mx-auto mb-5 grid h-16 w-16 place-items-center rounded-full bg-[#ea2e0e]/10 text-[#ea2e0e]">
         <HiOutlineShoppingBag size={34} />
@@ -175,31 +178,31 @@ const ShippingProgress = ({ subtotal, progress, amountRemaining }) => {
   const hasFreeShipping = subtotal >= FREE_SHIPPING_LIMIT;
 
   return (
-    <div className="shrink-0 px-5 py-4">
-      <div className="flex items-start gap-3 rounded-2xl bg-orange-50 p-4">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-[#ea2e0e]">
-          <FiTruck size={19} />
+    <div className="shrink-0 px-4 py-3 sm:px-5">
+      <div className="flex items-start gap-3 rounded-2xl bg-orange-50 p-3.5 sm:p-4">
+        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-[#ea2e0e] sm:h-10 sm:w-10">
+          <FiTruck size={18} />
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="font-bold text-gray-950">
+              <p className="text-xs font-bold text-gray-950 sm:text-sm">
                 {hasFreeShipping
                   ? "Free shipping unlocked"
                   : `Add ${formatCurrency(amountRemaining)} for free shipping`}
               </p>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-0.5 text-xs text-gray-500 sm:text-sm">
                 Free delivery over {formatCurrency(FREE_SHIPPING_LIMIT)}
               </p>
             </div>
 
-            <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-gray-700">
+            <span className="shrink-0 rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-gray-700">
               {Math.round(progress)}%
             </span>
           </div>
 
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-white">
+          <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white sm:h-2">
             <div
               className="h-full rounded-full bg-[#ea2e0e] transition-all duration-700"
               style={{ width: `${progress}%` }}
@@ -213,8 +216,8 @@ const ShippingProgress = ({ subtotal, progress, amountRemaining }) => {
 
 const CartItem = ({ product, onDecrease, onIncrease, onRemove }) => (
   <article className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm">
-    <div className="grid grid-cols-[92px_1fr] gap-3">
-      <div className="h-24 w-24 overflow-hidden rounded-xl bg-gray-100">
+    <div className="flex gap-3">
+      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100 sm:h-24 sm:w-24">
         <img
           src={product.image}
           alt={product.name}
@@ -222,14 +225,13 @@ const CartItem = ({ product, onDecrease, onIncrease, onRemove }) => (
         />
       </div>
 
-      <div className="min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col justify-between">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="line-clamp-2 text-sm font-bold leading-5 text-gray-950">
+            <h3 className="line-clamp-1 text-xs font-bold text-gray-950 sm:text-sm">
               {product.name}
             </h3>
-
-            <p className="mt-1 truncate text-xs font-semibold text-gray-500">
+            <p className="mt-0.5 text-xs font-semibold text-gray-500">
               {product.size || "M"} / {product.color || "Standard"}
             </p>
           </div>
@@ -238,20 +240,20 @@ const CartItem = ({ product, onDecrease, onIncrease, onRemove }) => (
             type="button"
             onClick={onRemove}
             aria-label={`Remove ${product.name}`}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+            className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-gray-400 transition hover:bg-red-50 hover:text-red-500"
           >
-            <RiDeleteBin3Line size={17} />
+            <RiDeleteBin3Line size={16} />
           </button>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="mt-2 flex items-center justify-between gap-2">
           <QuantityControl
             value={product.quantity}
             onDecrease={onDecrease}
             onIncrease={onIncrease}
           />
 
-          <p className="ml-auto whitespace-nowrap text-sm font-bold text-[#ea2e0e]">
+          <p className="whitespace-nowrap text-xs font-bold text-[#ea2e0e] sm:text-sm">
             {formatCurrency(product.price * product.quantity)}
           </p>
         </div>
@@ -261,18 +263,18 @@ const CartItem = ({ product, onDecrease, onIncrease, onRemove }) => (
 );
 
 const QuantityControl = ({ value, onDecrease, onIncrease }) => (
-  <div className="flex items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-1">
+  <div className="flex items-center gap-0.5 rounded-xl border border-gray-200 bg-gray-50 p-0.5">
     <button
       type="button"
       onClick={onDecrease}
       disabled={value <= 1}
       aria-label="Decrease quantity"
-      className="grid h-8 w-8 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 disabled:cursor-not-allowed disabled:opacity-30"
+      className="grid h-7 w-7 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 disabled:cursor-not-allowed disabled:opacity-30 sm:h-8 sm:w-8"
     >
-      <FiMinus size={14} />
+      <FiMinus size={13} />
     </button>
 
-    <span className="w-7 text-center text-sm font-bold text-gray-950">
+    <span className="w-6 text-center text-xs font-bold text-gray-950 sm:text-sm">
       {value}
     </span>
 
@@ -281,16 +283,16 @@ const QuantityControl = ({ value, onDecrease, onIncrease }) => (
       onClick={onIncrease}
       disabled={value >= MAX_QUANTITY}
       aria-label="Increase quantity"
-      className="grid h-8 w-8 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 disabled:cursor-not-allowed disabled:opacity-30"
+      className="grid h-7 w-7 place-items-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-950 disabled:cursor-not-allowed disabled:opacity-30 sm:h-8 sm:w-8"
     >
-      <FiPlus size={14} />
+      <FiPlus size={13} />
     </button>
   </div>
 );
 
 const CartFooter = ({ subtotal, shippingFee, total, onCheckout }) => (
-  <footer className="shrink-0 border-t border-gray-100 bg-white px-5 py-4 shadow-[0_-12px_30px_rgba(15,23,42,0.06)]">
-    <div className="space-y-2">
+  <footer className="shrink-0 border-t border-gray-100 bg-white px-4 py-3.5 shadow-[0_-12px_30px_rgba(15,23,42,0.06)] sm:px-5 sm:py-4">
+    <div className="space-y-1.5 sm:space-y-2">
       <SummaryRow label="Subtotal" value={formatCurrency(subtotal)} />
       <SummaryRow
         label="Shipping"
@@ -300,9 +302,11 @@ const CartFooter = ({ subtotal, shippingFee, total, onCheckout }) => (
         badge={shippingFee === 0}
       />
 
-      <div className="flex items-end justify-between border-t border-gray-100 pt-3">
-        <span className="text-sm font-bold text-gray-500">Total</span>
-        <span className="text-2xl font-bold tracking-tight text-[#ea2e0e]">
+      <div className="flex items-end justify-between border-t border-gray-100 pt-2.5 sm:pt-3">
+        <span className="text-xs font-bold text-gray-500 sm:text-sm">
+          Total
+        </span>
+        <span className="text-xl font-bold tracking-tight text-[#ea2e0e] sm:text-2xl">
           {formatCurrency(total)}
         </span>
       </div>
@@ -311,26 +315,26 @@ const CartFooter = ({ subtotal, shippingFee, total, onCheckout }) => (
     <button
       type="button"
       onClick={onCheckout}
-      className="group mt-4 flex w-full items-center justify-center gap-3 rounded-2xl bg-slate-950 px-6 py-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#ea2e0e] active:scale-[0.98]"
+      className="group mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#ea2e0e] active:scale-[0.98] sm:mt-4 sm:py-4 sm:text-sm"
     >
       Secure Checkout
       <HiOutlineArrowRight className="transition-transform group-hover:translate-x-1" />
     </button>
 
-    <p className="mt-3 text-center text-xs font-semibold text-gray-400">
+    <p className="mt-2.5 text-center text-[11px] font-semibold text-gray-400 sm:mt-3 sm:text-xs">
       Encrypted checkout / 30 day returns
     </p>
   </footer>
 );
 
 const SummaryRow = ({ label, value, badge = false }) => (
-  <div className="flex items-center justify-between text-sm">
+  <div className="flex items-center justify-between text-xs sm:text-sm">
     <span className="font-semibold text-gray-500">{label}</span>
 
     <span
       className={
         badge
-          ? "rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700"
+          ? "rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 sm:text-xs"
           : "font-bold text-gray-950"
       }
     >
